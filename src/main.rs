@@ -1,5 +1,5 @@
 use clap::Parser;
-use rcli::{process_csv, Opts, SubCommand};
+use rcli::{generate_password, process_csv, Opts, SubCommand};
 
 fn main() -> anyhow::Result<()> {
     let opts = Opts::parse();
@@ -12,6 +12,13 @@ fn main() -> anyhow::Result<()> {
             };
             process_csv(&opts.input, output, &opts.format)?
         }
+        SubCommand::Passgen(opts) => generate_password(
+            opts.length,
+            opts.uppercase,
+            opts.lowercase,
+            opts.digits,
+            opts.symbols,
+        )?,
     }
 
     Ok(())
