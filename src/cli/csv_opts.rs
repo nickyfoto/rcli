@@ -1,46 +1,8 @@
-use core::fmt;
-use std::{path::Path, str::FromStr};
+use std::{fmt, str::FromStr};
 
 use clap::Parser;
 
-#[derive(Debug, Parser)]
-#[command(name = "rcli", version, author, about, long_about = None)]
-pub struct Opts {
-    #[command(subcommand)]
-    pub cmd: SubCommand,
-}
-
-#[derive(Debug, Parser)]
-pub enum SubCommand {
-    #[command(name = "csv", about = "Show CSV, or convert CSV to other formats")]
-    Csv(CsvOpts),
-    #[command(name = "passgen", about = "Generate a random password")]
-    Passgen(PassgenOpts),
-}
-
-#[derive(Debug, Parser)]
-pub struct PassgenOpts {
-    #[arg(short, long, default_value_t = 16)]
-    pub length: u8,
-
-    #[arg(long, default_value_t = true)]
-    pub uppercase: bool,
-
-    #[arg(long, default_value_t = true)]
-    pub lowercase: bool,
-
-    #[arg(long, default_value_t = true)]
-    pub digits: bool,
-
-    #[arg(long, default_value_t = true)]
-    pub symbols: bool,
-}
-
-#[derive(Debug, Clone, Copy)]
-pub enum OutputFormat {
-    Json,
-    Yaml,
-}
+use super::verify_input_file;
 
 #[derive(Debug, Parser)]
 pub struct CsvOpts {
@@ -60,12 +22,10 @@ pub struct CsvOpts {
     pub header: bool,
 }
 
-fn verify_input_file(filename: &str) -> Result<String, String> {
-    if Path::new(filename).exists() {
-        Ok(filename.into())
-    } else {
-        Err(format!("File not found: {}", filename))
-    }
+#[derive(Debug, Clone, Copy)]
+pub enum OutputFormat {
+    Json,
+    Yaml,
 }
 
 fn parse_format(format: &str) -> Result<OutputFormat, String> {
