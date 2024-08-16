@@ -1,8 +1,6 @@
 use anyhow::Result;
 use rand::seq::SliceRandom;
 
-use zxcvbn::zxcvbn;
-
 const UPPER: &[u8] = b"ABCDEFGHJKLMNPQRSTUVWXYZ";
 const LOWER: &[u8] = b"abcdefghijkmnpqrstuvwxyz";
 const DIGITS: &[u8] = b"123456789";
@@ -15,7 +13,7 @@ pub fn generate_password(
     lowercase: bool,
     digits: bool,
     symbols: bool,
-) -> Result<()> {
+) -> Result<String> {
     let mut password = Vec::new();
     let mut rng = rand::thread_rng();
     let mut chars = Vec::new();
@@ -59,10 +57,11 @@ pub fn generate_password(
         password.push(*ch);
     }
     password.shuffle(&mut rng);
-    let password = String::from_utf8(password)?;
-    println!("{}", password);
+    // let password = String::from_utf8(password)?;
+    // println!("{}", password);
 
-    let estimate = zxcvbn(&password, &[]);
-    eprintln!("Password score: {}", estimate.score());
-    Ok(())
+    // let estimate = zxcvbn(&password, &[]);
+    // eprintln!("Password score: {}", estimate.score());
+
+    Ok(String::from_utf8(password)?)
 }
