@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.86"
+axum = { version = "0.7.5", features = ["http2", "query", "tracing"] }
 base64 = "0.22.1"
 blake3 = "1.5.3"
 clap = { version = "4.5.15", features = ["derive"] }
@@ -16,4 +17,7 @@ rand = "0.8.5"
 serde = { version = "1.0.207", features = ["derive"] }
 serde_json = "1.0.124"
 serde_yaml = "0.9.34"
+tokio = { version = "1.39.2", features = ["rt", "rt-multi-thread", "macros", "net", "fs"] }
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 zxcvbn = "3.1.0"
