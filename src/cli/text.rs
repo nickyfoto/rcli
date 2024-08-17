@@ -1,6 +1,12 @@
 use std::{path::PathBuf, str::FromStr};
 
+use crate::{
+    get_content, get_reader, process_text_key_generate, process_text_sign, process_text_verify,
+    CmdExecuter,
+};
+use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
 use clap::Parser;
+use tokio::fs;
 
 use super::{verify_file, verify_path};
 
@@ -18,6 +24,53 @@ pub struct TextSignOpts {
     pub key: String,
     #[arg(long, default_value = "black3", value_parser = parse_text_sign_format)]
     pub format: TextSignFormat,
+}
+
+impl CmdExecuter for TextSignOpts {
+    async fn execute(&self) -> anyhow::Result<()> {
+        let mut reader = get_reader(&self.input)?;
+        let key = get_content(&self.key)?;
+        let sig = process_text_sign(&mut reader, &key, self.format)?;
+        // base64 output
+        let encoded = URL_SAFE_NO_PAD.encode(sig);
+        println!("{}", encoded);
+        Ok(())
+    }
+}
+
+impl CmdExecuter for TextVerifyOpts {
+    async fn execute(&self) -> anyhow::Result<()> {
+        let mut reader = get_reader(&self.input)?;
+        let key = get_content(&self.key)?;
+        let decoded = URL_SAFE_NO_PAD.decode(&self.sig)?;
+        let verified = process_text_verify(&mut reader, &key, &decoded, self.format)?;
+        if verified {
+            println!("Signature verified");
+        } else {
+            println!("Signature not verified");
+        }
+        Ok(())
+    }
+}
+
+impl CmdExecuter for KeyGenerateOpts {
+    async fn execute(&self) -> anyhow::Result<()> {
+        let key = process_text_key_generate(self.format)?;
+        for (k, v) in key {
+            fs::write(self.output_path.join(k), v).await?;
+        }
+        Ok(())
+    }
+}
+
+impl CmdExecuter for TextSubCommand {
+    async fn execute(&self) -> anyhow::Result<()> {
+        match self {
+            Self::Sign(opts) => opts.execute().await,
+            Self::Verify(opts) => opts.execute().await,
+            Self::Generate(opts) => opts.execute().await,
+        }
+    }
 }
 
 #[derive(Debug, Parser)]

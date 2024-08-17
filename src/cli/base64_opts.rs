@@ -2,6 +2,8 @@ use std::{fmt, str::FromStr};
 
 use clap::Parser;
 
+use crate::{get_reader, process_encode, CmdExecuter};
+
 use super::verify_file;
 
 #[derive(Debug, Parser)]
@@ -26,6 +28,33 @@ pub struct Base64DecodeOpts {
     pub input: String,
     #[arg(long, value_parser = parse_base64_format, default_value = "standard")]
     pub format: Base64Format,
+}
+
+impl CmdExecuter for Base64SubCommand {
+    async fn execute(&self) -> anyhow::Result<()> {
+        match self {
+            Base64SubCommand::Encode(opts) => opts.execute().await,
+            Base64SubCommand::Decode(opts) => opts.execute().await,
+        }
+    }
+}
+
+impl CmdExecuter for Base64EncodeOpts {
+    async fn execute(&self) -> anyhow::Result<()> {
+        let mut reader = get_reader(&self.input)?;
+        let encoded = process_encode(&mut reader, self.format)?;
+        println!("{}", encoded);
+        Ok(())
+    }
+}
+
+impl CmdExecuter for Base64DecodeOpts {
+    async fn execute(&self) -> anyhow::Result<()> {
+        let mut reader = get_reader(&self.input)?;
+        let decoded = process_encode(&mut reader, self.format)?;
+        println!("{}", decoded);
+        Ok(())
+    }
 }
 
 #[derive(Debug, Clone, Copy)]

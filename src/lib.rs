@@ -8,3 +8,8 @@ pub use process::{
     process_text_key_generate, process_text_sign, process_text_verify,
 };
 pub use utils::{get_content, get_reader};
+
+#[allow(async_fn_in_trait)]
+pub trait CmdExecuter {
+    async fn execute(&self) -> anyhow::Result<()>;
+}
