@@ -6,6 +6,7 @@ use crate::{
 };
 use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
 use clap::Parser;
+use enum_dispatch::enum_dispatch;
 use tokio::fs;
 
 use super::{verify_file, verify_path};
@@ -63,16 +64,6 @@ impl CmdExecuter for KeyGenerateOpts {
     }
 }
 
-impl CmdExecuter for TextSubCommand {
-    async fn execute(&self) -> anyhow::Result<()> {
-        match self {
-            Self::Sign(opts) => opts.execute().await,
-            Self::Verify(opts) => opts.execute().await,
-            Self::Generate(opts) => opts.execute().await,
-        }
-    }
-}
-
 #[derive(Debug, Parser)]
 pub struct TextVerifyOpts {
     #[arg(short, long, value_parser = verify_file, default_value = "-")]
@@ -94,6 +85,7 @@ pub struct KeyGenerateOpts {
 }
 
 #[derive(Debug, Parser)]
+#[enum_dispatch(CmdExecuter)]
 pub enum TextSubCommand {
     #[command(about = "Sign a text with a private/session key and return a signature")]
     Sign(TextSignOpts),

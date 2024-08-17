@@ -1,12 +1,14 @@
 use std::{fmt, str::FromStr};
 
 use clap::Parser;
+use enum_dispatch::enum_dispatch;
 
 use crate::{get_reader, process_encode, CmdExecuter};
 
 use super::verify_file;
 
 #[derive(Debug, Parser)]
+#[enum_dispatch(CmdExecuter)]
 pub enum Base64SubCommand {
     #[command(name = "encode", about = "Encode a string to base64")]
     Encode(Base64EncodeOpts),
@@ -28,15 +30,6 @@ pub struct Base64DecodeOpts {
     pub input: String,
     #[arg(long, value_parser = parse_base64_format, default_value = "standard")]
     pub format: Base64Format,
-}
-
-impl CmdExecuter for Base64SubCommand {
-    async fn execute(&self) -> anyhow::Result<()> {
-        match self {
-            Base64SubCommand::Encode(opts) => opts.execute().await,
-            Base64SubCommand::Decode(opts) => opts.execute().await,
-        }
-    }
 }
 
 impl CmdExecuter for Base64EncodeOpts {
